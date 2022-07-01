@@ -348,13 +348,12 @@
       <path id="Path_40" data-name="Path 40" d="M644.6,141S143.02,215.537,147.049,870.207s342.774,201.755,342.774,201.755S404.659,847.213,388.815,762.2c-27.116-145.51-11.551-384.124,271.9-609.1C671.15,139.365,644.6,141,644.6,141Z" transform="translate(-147.025 -140.939)" fill="#f5f5f5"/>
     </svg>
 
+  </div>
 
-    <div>
-      <input type="file" (change)="addExcel($event)" placeholder="Upload file" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
-      <input style="width: 300px;" type="text" [(ngModel)]="formula" />
-      <button (click)="convert()">Convert</button>
-    </div>
-
+  <div style="background-color: #1976d2; margin-top: 30%; display: flex; flex-direction: column; width: 100vw;">
+    <input type="file" style="height: 40px; color: white; font-weight: bold; display: flex; justify-content: center; align-items: center;" (change)="addExcel($event)" placeholder="Upload file" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
+    <input style="width: 100vw; height: 40px;" type="text" [(ngModel)]="formula" />
+    <button style="all:unset; height: 40px; background-color: green; color: white; font-size: x-small; padding: 0 10px; display: flex; justify-content: center; align-items: center;" (click)="convert()">Convert</button>
   </div>
 
   

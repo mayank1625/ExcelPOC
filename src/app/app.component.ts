@@ -26,12 +26,25 @@ export class AppComponent {
     let startArg = false
 
     formulaArr.forEach((char, idx) => {
+
+      if(char === '#') {
+        start = idx + 1
+        return;
+      }
+
       if(char === "(") {
         execution.push("FUN START")
         execution.push(formula.substring(start, idx))
         start = idx + 1;
         return
       }
+
+      if(char && !isNaN(Number.parseInt(char))) {
+        console.log(char)
+        execution.push(Number(char))
+        return
+      }
+
       if(char === '$') {
         if(!startArg) {
           start = idx;
@@ -76,6 +89,7 @@ export class AppComponent {
 
         if(execution[i] === 'FUN START') {
           execute(i)
+          args.push(execution[i])
           continue
         }
 
