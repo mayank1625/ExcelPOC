@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
+import * as EXCEL from "@formulajs/formulajs";
 
 @Component({
   selector: 'app-root',
@@ -9,14 +10,90 @@ import * as FileSaver from 'file-saver';
 })
 export class AppComponent {
   title = 'excel-poc';
-  formula = "";
+  formula = "CONCATENATE($FirstName$, $LastName$)";
   excelFile: any = null;
   excelBufferArr: any
   excelDataArr: any;
   transformedExcel: any[] = [];
 
-  private formulaCompute() {
-    if(!)
+
+  private formulaCompute(row: number): unknown {
+    let formula = this.formula
+    const formulaArr = this.formula.split("")
+    let execution = [];
+    
+    let start = 0
+    let startArg = false
+
+    formulaArr.forEach((char, idx) => {
+      if(char === "(") {
+        execution.push("FUN START")
+        execution.push(formula.substring(start, idx))
+        start = idx + 1;
+        return
+      }
+      if(char === '$') {
+        if(!startArg) {
+          start = idx;
+          startArg = true;
+          return
+        }
+        execution.push(this.excelDataArr[row][formula.substring(start+1, idx)])
+        startArg = false;
+        return
+      }
+
+      if(char === '"') {
+        if(!startArg) {
+          start = idx;
+          startArg = true;
+          return
+        }
+        execution.push(formula.substring(start+1, idx))
+        startArg = false;
+        return
+      }
+
+      if(char === ")") {
+        execution.push("FUN END")
+      }
+    });
+
+
+    console.log(execution)
+
+    const execute = (idx = 0) => {
+      if(execution[idx] !== "FUN START") return;
+      const fun = execution[idx + 1];
+      let last_idx = 0
+      const args = []
+      for(let i = idx + 2; i < execution.length; i++) {
+        if(execution[i] !== 'FUN START' && execution[i] !== 'FUN END') {
+          args.push(execution[i])
+          continue
+        }
+
+
+        if(execution[i] === 'FUN START') {
+          execute(i)
+          continue
+        }
+
+        if(execution[i] === 'FUN END') {
+
+          last_idx = i;
+          break
+        }
+      }
+
+      execution.splice(idx, last_idx - idx + 1, EXCEL[fun] ? EXCEL[fun](args) : '' )
+
+    }
+
+    execute();
+
+    console.log(execution)
+    return execution.length > 1 ? "INVALID FORMULA" : execution[0]
   }
 
   public concat(destinationHeader: string) {
@@ -35,8 +112,13 @@ export class AppComponent {
  
   public convert(): void {
     if(!this.formula) return
-    this.concat("Name")
+    //this.concat("Name")
 
+    const destinationHeader= 'name'
+
+    this.excelDataArr.map((ele:any, i: number) => {
+      this.transformedExcel[i] = this.transformedExcel[i] ? {...this.transformedExcel[i], [destinationHeader]: `${this.formulaCompute(i)}`} : {[destinationHeader]: `${this.formulaCompute(i)}`}
+    });
 
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.transformedExcel);
     const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
